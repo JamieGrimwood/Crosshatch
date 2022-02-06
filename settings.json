@@ -1,0 +1,7 @@
+{
+    "port": "7070",
+    "auth": {
+        "password": "test123",
+        "secret": "test123"
+    }
+}
