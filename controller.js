@@ -1,54 +1,59 @@
-const docker = require('dockerode');
+const Docker = require('dockerode');
+const docker = new Docker();
 
-exports.getInfo = async (id) => {
-    const container = docker.getContainer(id);
-    if (!container) return
-    container.inspect(function (err, data) {
-        console.log(data);
-        return data;
-    });
-}
+module.exports = {
+    listAll: async () => {
+        docker.listContainers({ all: true }, function (err, containers) {
+            console.log(containers)
+            if (err) return err;
 
-exports.startContainer = async (id) => {
-    const container = docker.getContainer(id);
-    if (!container) return
-    container.start()
-}
-
-exports.stopContainer = async (id) => {
-    const container = docker.getContainer(id);
-    if (!container) return
-    container.stop()
-}
-
-exports.stopAllContainers = async () => {
-    docker.listContainers(function (err, containers) {
-        containers.forEach(function (containerInfo) {
-            docker.getContainer(containerInfo.Id).stop(cb);
+            return containers;
         });
-    });
-}
-
-exports.removeContainer = async (id) => {
-    const container = docker.getContainer(id);
-    if (!container) return
-    container.remove()
-}
-
-exports.createContainer = async (name, image, ports) => {
-    docker.createContainer({
-        Image: image,
-        name: name,
-        AttachStdin: true,
-        AttachStdout: true,
-        AttachStderr: true,
-        Tty: true,
-        HostConfig: {
-            PortBindings: {
-                '80/tcp': [{ HostPort: '80' }], '443/tcp': [{ HostPort: '443' }]
+    },
+    getInfo: async (id) => {
+        const container = await docker.getContainer(id);
+        if (!container) return
+        container.inspect(function (err, data) {
+            return data;
+        });
+    },
+    startContainer: async (id) => {
+        const container = await docker.getContainer(id);
+        if (!container) return
+        container.start()
+    },
+    stopContainer: async (id) => {
+        const container = docker.getContainer(id);
+        if (!container) return
+        container.stop()
+    },
+    stopAllContainers: async () => {
+        docker.listContainers(function (err, containers) {
+            containers.forEach(function (containerInfo) {
+                docker.getContainer(containerInfo.Id).stop(cb);
+            });
+        });
+    },
+    removeContainer: async (id) => {
+        const container = docker.getContainer(id);
+        if (!container) return
+        container.remove()
+    },
+    createContainer: async (name, image, ports) => {
+        docker.createContainer({
+            Image: image,
+            name: name,
+            AttachStdin: true,
+            AttachStdout: true,
+            AttachStderr: true,
+            Tty: true,
+            HostConfig: {
+                PortBindings: {
+                    '80/tcp': [{ HostPort: '80' }], '443/tcp': [{ HostPort: '443' }]
+                },
             },
-        },
-    }).then(function (container) {
-        container.start();
-    })
+        }).then(function (container) {
+            container.start();
+        })
+    }
 }
