@@ -1,10 +1,9 @@
 <h1>Welcome to the dashboard.</h1>
 
 <% for (var i = 0; i < containers_list.length; i++) { %>
-    <h2>Name: <%= containers_list[i].Names[0] %></h2>
+    <h2><a href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
     <a>Image: <%= containers_list[i].Image %></a><br>
     <a>State: <%= containers_list[i].State %></a><br>
-    <a>Status: <%= containers_list[i].Status %></a><br>
+    <a>Uptime: <%= containers_list[i].Status %></a><br>
     <a>Container ID: <%= containers_list[i].Id %></a><br>
-    <a href="/<%= containers_list[i].Id %>/api/start">Start Container</a>
 <% } %>

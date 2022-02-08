@@ -17,7 +17,8 @@ app.use(session({
   saveUninitialized: true
 }));
 
-app.use(require("./router/index.js"));
+app.use(require("./router/api"));
+app.use(require("./router/index"));
 app.use(require("./router/authenticated"));
 
 app.listen(settings.port, () => {

@@ -1,0 +1,28 @@
+<a href="/dashboard">Go Home</a><br></br>
+
+<h1>Name: <%= container_info.Name %></h2>
+<a>Image: <%= container_info.Image %></a><br>
+<a>State: <%= container_info.State.Status %></a><br>
+<% if (container_info.State.Running === false) { %>
+    <a>Exit Code: <%= container_info.State.ExitCode %></a><br>
+<% } %>
+<a>Container ID: <%= container_info.Id %></a><br>
+<form action="/dashboard/container/<%= container_info.Id %>/actions/start" method="post">
+    <% if (container_info.State.Running === true) { %>
+        <button name="start" value="start" disabled>Start Container</button>
+    <% } else { %>
+        <button name="start" value="start">Start Container</button>
+    <% } %>
+</form>
+
+<form action="/dashboard/container/<%= container_info.Id %>/actions/stop" method="post">
+    <% if (container_info.State.Running === false) { %>
+        <button name="stop" value="stop" disabled>Stop Container</button>
+    <% } else { %>
+        <button name="stop" value="stop">Stop Container</button>
+    <% } %>
+</form>
+
+<script>
+    fetch('/')
+</script>

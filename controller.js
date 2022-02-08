@@ -12,10 +12,14 @@ module.exports = {
         });
     },
     getInfo: async (id) => {
-        const container = await docker.getContainer(id);
-        if (!container) return
-        container.inspect(function (err, data) {
-            return data;
+        return new Promise(async (resolve, reject) => {
+            const container = await docker.getContainer(id);
+            if (!container) return
+            container.inspect(function (err, data) {
+                if (err) return reject(err)
+
+                resolve(data)
+            });
         });
     },
     startContainer: async (id) => {
