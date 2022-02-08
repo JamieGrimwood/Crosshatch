@@ -3,11 +3,12 @@ const docker = new Docker();
 
 module.exports = {
     listAll: async () => {
-        docker.listContainers({ all: true }, function (err, containers) {
-            console.log(containers)
-            if (err) return err;
+        return new Promise((resolve, reject) => {
+            docker.listContainers({ all: true }, function (err, containers) {
+                if (err) return reject(err)
 
-            return containers;
+                resolve(containers)
+            });
         });
     },
     getInfo: async (id) => {
