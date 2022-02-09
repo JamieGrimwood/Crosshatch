@@ -1,5 +1,13 @@
 <h1>Welcome to the dashboard.</h1>
 
+<form action="/dashboard/container/all/actions/start" method="post">
+    <button name="start" value="start">Start Container</button>
+</form>
+
+<form action="/dashboard/container/all/actions/stop" method="post">
+    <button name="stop" value="stop">Stop Container</button>
+</form>
+
 <% for (var i = 0; i < containers_list.length; i++) { %>
     <h2><a href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
     <a>Image: <%= containers_list[i].Image %></a><br>

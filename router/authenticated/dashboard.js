@@ -21,17 +21,27 @@ router.get('/dashboard/container/:id', async (req, res) => {
     res.render("container_overview", { container_info: container })
 });
 
-router.post('/dashboard/container/:id/actions/stop', async (req, res) => {
+router.post('/dashboard/container/:id/actions/start', async (req, res) => {
     if (!req.params.id) return res.send("No container specified")
-    await controller.stopContainer(req.params.id)
-    await sleep(1000);
+    const container = await controller.startContainer(req.params.id)
+    if (container === false) return res.send("Invalid container ID")
+    await sleep(1000); //wait to give container time to start
     res.redirect(`/dashboard/container/${req.params.id}`)
 });
 
-router.post('/dashboard/container/:id/actions/start', async (req, res) => {
+router.post('/dashboard/container/:id/actions/stop', async (req, res) => {
     if (!req.params.id) return res.send("No container specified")
-    await controller.startContainer(req.params.id)
-    await sleep(1000);
+    const container = await controller.stopContainer(req.params.id)
+    if (container === false) return res.send("Invalid container ID")
+    await sleep(1000); //wait to give container time to stop
+    res.redirect(`/dashboard/container/${req.params.id}`)
+});
+
+router.post('/dashboard/container/:id/actions/kill', async (req, res) => {
+    if (!req.params.id) return res.send("No container specified")
+    const container = await controller.killContainer(req.params.id)
+    if (container === false) return res.send("Invalid container ID")
+    await sleep(1000); //wait to give container time to start
     res.redirect(`/dashboard/container/${req.params.id}`)
 });
 

@@ -23,14 +23,25 @@ module.exports = {
         });
     },
     startContainer: async (id) => {
-        const container = await docker.getContainer(id);
-        if (!container) return
-        container.start()
+        return new Promise(async (resolve, reject) => {
+            const container = await docker.getContainer(id);
+            if (!container) return false;
+            container.start()
+        })
     },
     stopContainer: async (id) => {
-        const container = docker.getContainer(id);
-        if (!container) return
-        container.stop()
+        return new Promise(async (resolve, reject) => {
+            const container = await docker.getContainer(id);
+            if (!container) return false;
+            container.stop()
+        })
+    },
+    killContainer: async (id) => {
+        return new Promise(async (resolve, reject) => {
+            const container = await docker.getContainer(id);
+            if (!container) return false;
+            container.kill()
+        })
     },
     stopAllContainers: async () => {
         docker.listContainers(function (err, containers) {
