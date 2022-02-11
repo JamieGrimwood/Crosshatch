@@ -14,7 +14,6 @@ module.exports = {
     getInfo: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            if (!container) reject(false)
             container.inspect(function (err, data) {
                 if (err) return reject(err)
 
@@ -25,7 +24,6 @@ module.exports = {
     startContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            if (!container) return false;
             container.start()
             resolve(true)
         })
@@ -33,7 +31,6 @@ module.exports = {
     stopContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            if (!container) return false;
             container.stop()
             resolve(true)
         })
@@ -41,7 +38,6 @@ module.exports = {
     killContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            if (!container) return false;
             container.kill()
             resolve(true)
         })
@@ -51,7 +47,9 @@ module.exports = {
             docker.listContainers({ all: true }, function (err, containers) {
                 if (err) reject(false);
                 containers.forEach(function (containerInfo) {
-                    docker.getContainer(containerInfo.Id).start();
+                    docker.getContainer(containerInfo.Id).start().catch(error => {
+                        if (error.reason === `container already stopped`) return
+                    });
                 });
             });
             resolve(true);
@@ -80,9 +78,12 @@ module.exports = {
         })
     },
     removeContainer: async (id) => {
-        const container = docker.getContainer(id);
-        if (!container) return
-        container.remove()
+        return new Promise(async (resolve, reject) => {
+            const container = docker.getContainer(id);
+            if (!container.Name) return reject(false)
+            container.remove()
+            resolve(true)
+        })
     },
     createContainer: async (name, image, ports) => {
         docker.createContainer({

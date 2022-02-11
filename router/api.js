@@ -12,7 +12,7 @@ router.post('/api/:password/*', async (req, res, next) => {
 
 router.post('/api/:password/container/:id/', async (req, res) => {
     if (!req.params.id) return res.send("No container specified")
-    const info = await controller.getInfo(req.params.id)
+    const info = await controller.getInfo(req.params.id).catch(error => { res.send(error) })
     res.json(info)
 });
 
