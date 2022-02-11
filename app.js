@@ -22,5 +22,5 @@ app.use(require("./router/index"));
 app.use(require("./router/authenticated"));
 
 app.listen(settings.port, () => {
-  console.log(`Example app listening on port ${settings.port}`);
+  console.log(`Crosshatch listening on port ${settings.port}`);
 });

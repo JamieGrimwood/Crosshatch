@@ -26,7 +26,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
             if (!container) return false;
-            //container.start()
+            container.start()
             resolve(true)
         })
     },
@@ -46,12 +46,38 @@ module.exports = {
             resolve(true)
         })
     },
-    stopAllContainers: async () => {
-        docker.listContainers(function (err, containers) {
-            containers.forEach(function (containerInfo) {
-                docker.getContainer(containerInfo.Id).stop(cb);
+    startAllContainers: async () => {
+        return new Promise(async (resolve, reject) => {
+            docker.listContainers({ all: true }, function (err, containers) {
+                if (err) reject(false);
+                containers.forEach(function (containerInfo) {
+                    docker.getContainer(containerInfo.Id).start();
+                });
             });
-        });
+            resolve(true);
+        })
+    },
+    stopAllContainers: async () => {
+        return new Promise(async (resolve, reject) => {
+            docker.listContainers({ all: true }, function (err, containers) {
+                if (err) reject(false);
+                containers.forEach(function (containerInfo) {
+                    docker.getContainer(containerInfo.Id).stop();
+                });
+            });
+            resolve(true);
+        })
+    },
+    killAllContainers: async () => {
+        return new Promise(async (resolve, reject) => {
+            docker.listContainers({ all: true }, function (err, containers) {
+                if (err) reject(false);
+                containers.forEach(function (containerInfo) {
+                    docker.getContainer(containerInfo.Id).kill();
+                });
+            });
+            resolve(true);
+        })
     },
     removeContainer: async (id) => {
         const container = docker.getContainer(id);

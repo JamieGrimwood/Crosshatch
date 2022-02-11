@@ -1,7 +1,10 @@
 {
     "port": "7070",
+    "_note": "The port that Crosshatch will run on.",
     "auth": {
         "password": "test123",
-        "secret": "test123"
+        "_note": "This is the password used to login",
+        "secret": "test123",
+        "__note": "This is the secret key for the cookies. Make this secure."
     }
 }

@@ -14,13 +14,17 @@
     <button onclick="start()">Start Container</button>
 <% } %>
 
-<form action="/dashboard/container/<%= container_info.Id %>/actions/stop" method="post">
-    <% if (container_info.State.Running===false) { %>
-        <button name="stop" value="stop" disabled>Stop Container</button>
-    <% } else { %>
-        <button name="stop" value="stop">Stop Container</button>
-    <% } %>
-</form>
+<% if (container_info.State.Running===false) { %>
+    <button disabled>Stop Container</button>
+<% } else { %>
+    <button onclick="stop()">Stop Container</button>
+<% } %>
+
+<% if (container_info.State.Running===false) { %>
+    <button disabled>Kill Container</button>
+<% } else { %>
+    <button onclick="kill()">Kill Container</button>
+<% } %>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -32,20 +36,70 @@
 </script>
 <script>
     async function start() {
-        console.log("function called")
         const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/start", { method: "POST", credentials: "same-origin"});
         const response = await res.json();
-        console.log(response);
         if (response.status === 'STARTED') {
-                Swal.fire({
-                    title: 'Success',
-                    text: 'The container has been sucessfully started.',
-                    icon: 'success'
-                }).then(async (result) => {
-                    await sleep(1000) //Give the container time to start incase they click OK too quickly.
-                    location.reload()
-                })
-            }
+            Swal.fire({
+                title: 'Success',
+                text: 'The start signal has been sent to the contianer.',
+                icon: 'success'
+            }).then(async (result) => {
+                await sleep(500) //Give the container time to start incase they click OK too quickly.
+                location.reload()
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Uh Oh!',
+                text: 'Something went wrong when sending the start signal to the container! Please try again later.',
+            })
+        }
+    }
+</script>
+
+<script>
+    async function stop() {
+        const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/stop", { method: "POST", credentials: "same-origin"});
+        const response = await res.json();
+        if (response.status === 'STOPPED') {
+            Swal.fire({
+                title: 'Success',
+                text: 'The stop signal has been sent to the contianer.',
+                icon: 'success'
+            }).then(async (result) => {
+                await sleep(500) //Give the container time to start incase they click OK too quickly.
+                location.reload()
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Uh Oh!',
+                text: 'Something went wrong when sending the stop signal to the container! Please try again later.',
+            })
+        }
+    }
+</script>
+
+<script>
+    async function kill() {
+        const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/kill", { method: "POST", credentials: "same-origin"});
+        const response = await res.json();
+        if (response.status === 'STOPPED') {
+            Swal.fire({
+                title: 'Success',
+                text: 'The kill signal has been sent to the contianer.',
+                icon: 'success'
+            }).then(async (result) => {
+                await sleep(500) //Give the container time to start incase they click OK too quickly.
+                location.reload()
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Uh Oh!',
+                text: 'Something went wrong when sending the kill signal to the container! Please try again later.',
+            })
+        }
     }
 </script>
 

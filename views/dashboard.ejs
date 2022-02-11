@@ -1,12 +1,10 @@
 <h1>Welcome to the dashboard.</h1>
 
-<form action="/dashboard/container/all/actions/start" method="post">
-    <button name="start" value="start">Start Container</button>
-</form>
+<button onclick="start()">Start All Containers</button>
 
-<form action="/dashboard/container/all/actions/stop" method="post">
-    <button name="stop" value="stop">Stop Container</button>
-</form>
+<button onclick="stop()">Stop All Containers</button>
+
+<button onclick="kill()">Kill All Containers</button>
 
 <% for (var i = 0; i < containers_list.length; i++) { %>
     <h2><a href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
@@ -15,3 +13,86 @@
     <a>Uptime: <%= containers_list[i].Status %></a><br>
     <a>Container ID: <%= containers_list[i].Id %></a><br>
 <% } %>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function sleep(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
+    }
+</script>
+<script>
+    async function start() {
+        const res = await fetch("/dashboard/container/all/actions/start", { method: "POST", credentials: "same-origin"});
+        const response = await res.json();
+        if (response.status === 'STARTED') {
+            Swal.fire({
+                title: 'Success',
+                text: 'The startup signal has been sent to all contianers. Please give them a minute to boot.',
+                icon: 'success'
+            }).then(async (result) => {
+                await sleep(500) //Give the container time to start incase they click OK too quickly.
+                location.reload()
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Uh Oh!',
+                text: 'Something went wrong when sending the startup signal to the containers! Please try again later.',
+            })
+        }
+    }
+</script>
+
+<script>
+    async function stop() {
+        const res = await fetch("/dashboard/container/all/actions/stop", { method: "POST", credentials: "same-origin"});
+        const response = await res.json();
+        if (response.status === 'STOPPED') {
+            Swal.fire({
+                title: 'Success',
+                text: 'The stop signal has been sent to all contianers. Please give them a minute to shutdown.',
+                icon: 'success'
+            }).then(async (result) => {
+                await sleep(500) //Give the container time to start incase they click OK too quickly.
+                location.reload()
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Uh Oh!',
+                text: 'Something went wrong when sending the stop signal to the containers! Please try again later.',
+            })
+        }
+    }
+</script>
+
+<script>
+    async function kill() {
+        const res = await fetch("/dashboard/container/all/actions/kill", { method: "POST", credentials: "same-origin"});
+        const response = await res.json();
+        if (response.status === 'KILLED') {
+            Swal.fire({
+                title: 'Success',
+                text: 'The kill signal has been sent to all contianers. Please give them a minute to shutdown.',
+                icon: 'success'
+            }).then(async (result) => {
+                await sleep(500) //Give the container time to start incase they click OK too quickly.
+                location.reload()
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Uh Oh!',
+                text: 'Something went wrong when sending the kill signal to the containers! Please try again later.',
+            })
+        }
+    }
+</script>
+
+<style>
+    body {
+        font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+    }
+</style>
