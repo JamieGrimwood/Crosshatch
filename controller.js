@@ -26,7 +26,8 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
             if (!container) return false;
-            container.start()
+            //container.start()
+            resolve(true)
         })
     },
     stopContainer: async (id) => {
@@ -34,6 +35,7 @@ module.exports = {
             const container = await docker.getContainer(id);
             if (!container) return false;
             container.stop()
+            resolve(true)
         })
     },
     killContainer: async (id) => {
@@ -41,6 +43,7 @@ module.exports = {
             const container = await docker.getContainer(id);
             if (!container) return false;
             container.kill()
+            resolve(true)
         })
     },
     stopAllContainers: async () => {

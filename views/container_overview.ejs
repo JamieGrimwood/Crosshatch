@@ -8,15 +8,13 @@
 <% } %>
 <a>Container ID: <%= container_info.Id %></a><br>
 
-<form action="/dashboard/container/<%= container_info.Id %>/actions/start" method="post">
-    <% if (container_info.State.Running===true) { %>
-        <button name="start" value="start" disabled>Start Container</button>
-    <% } else { %>
-        <button name="start" value="start">Start Container</button>
-    <% } %>
-</form>
+<% if (container_info.State.Running===true) { %>
+    <button disabled>Start Container</button>
+<% } else { %>
+    <button onclick="start()">Start Container</button>
+<% } %>
 
-<form action="" method="post">
+<form action="/dashboard/container/<%= container_info.Id %>/actions/stop" method="post">
     <% if (container_info.State.Running===false) { %>
         <button name="stop" value="stop" disabled>Stop Container</button>
     <% } else { %>
@@ -26,18 +24,33 @@
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function start() {
-        fetch('/dashboard/container/<%= container_info.Id %>/actions/stop', {
-            method: 'POST',
-        }).then(response => response.text())
-        .then(data => {
-            if (response === "notfound") {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Uh Oh!',
-                    text: 'Something has gone very wrong with the application. Please check the console for errors.',
-                })
-            }
-        })
+    function sleep(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 </script>
+<script>
+    async function start() {
+        console.log("function called")
+        const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/start", { method: "POST", credentials: "same-origin"});
+        const response = await res.json();
+        console.log(response);
+        if (response.status === 'STARTED') {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'The container has been sucessfully started.',
+                    icon: 'success'
+                }).then(async (result) => {
+                    await sleep(1000) //Give the container time to start incase they click OK too quickly.
+                    location.reload()
+                })
+            }
+    }
+</script>
+
+<style>
+    body {
+        font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+    }
+</style>
