@@ -2,6 +2,12 @@
 
 Crosshatch is an opensource software that allows controlling docker containers from the web. You can mass start, stop and kill, and you can view each container individually.
 
+## Images:
+
+![Screenshot of dashboard](https://bot-has-a-hissy-fit.uploader.one/uploads/VKQ3e.png)
+![Container overview page](https://bot-has-a-hissy-fit.uploader.one/uploads/Bt0c6.png)
+![Starting a container](https://bot-has-a-hissy-fit.uploader.one/uploads/ZPC8u.png)
+![Dashboard again](https://bot-has-a-hissy-fit.uploader.one/uploads/wHWje.png)
 ## Todo:
 1. Add live updating stats through websockets
 2. Make the css nicer
