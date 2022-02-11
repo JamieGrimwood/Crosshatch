@@ -14,7 +14,7 @@ module.exports = {
     getInfo: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            if (!container) return
+            if (!container) reject(false)
             container.inspect(function (err, data) {
                 if (err) return reject(err)
 

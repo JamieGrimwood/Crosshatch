@@ -12,6 +12,7 @@ router.get('/dashboard', async (req, res) => {
 router.get('/dashboard/container/:id', async (req, res) => {
     if (!req.params.id) return res.redirect('/dashboard')
     const container = await controller.getInfo(req.params.id)
+    if (container === false) return res.send("Invalid container ID")
     res.render("container_overview", { container_info: container })
 });
 
