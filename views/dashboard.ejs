@@ -22,7 +22,6 @@
 
     socket.onmessage = function (event) {
         const json = JSON.parse(event.data)
-        console.log(json)
 
         for (var i = 0; i < json.length; i++) {
             const container = document.getElementById(`container_${json[i].Id}`);

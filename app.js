@@ -6,10 +6,6 @@ const settings = require('./settings.json')
 const expressWs = require('express-ws')
 expressWs(app)
 
-app.ws("/", (ws, req) => {
-  console.log(req)
-})
-
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: false }));

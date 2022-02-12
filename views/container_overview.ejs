@@ -19,7 +19,6 @@
 
     socket.onmessage = function (event) {
         const json = JSON.parse(event.data)
-        console.log(json)
         document.getElementById("name").innerHTML = `Name: ${json.Name}`;
         document.getElementById("image").innerHTML = `Image: ${json.Image}`;
         document.getElementById("state").innerHTML = `State: ${json.State.Status}`;
