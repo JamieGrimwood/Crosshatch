@@ -48,7 +48,7 @@ module.exports = {
                 if (err) reject(false);
                 containers.forEach(function (containerInfo) {
                     docker.getContainer(containerInfo.Id).start().catch(error => {
-                        if (error.reason === `container already stopped`) return
+                        if (error.statusCode === 304) return
                     });
                 });
             });
@@ -60,7 +60,9 @@ module.exports = {
             docker.listContainers({ all: true }, function (err, containers) {
                 if (err) reject(false);
                 containers.forEach(function (containerInfo) {
-                    docker.getContainer(containerInfo.Id).stop();
+                    docker.getContainer(containerInfo.Id).stop().catch(error => {
+                        if (error.statusCode === 304) return
+                    });
                 });
             });
             resolve(true);
@@ -71,7 +73,9 @@ module.exports = {
             docker.listContainers({ all: true }, function (err, containers) {
                 if (err) reject(false);
                 containers.forEach(function (containerInfo) {
-                    docker.getContainer(containerInfo.Id).kill();
+                    docker.getContainer(containerInfo.Id).kill().catch(error => {
+                        if (error.statusCode === 409) return
+                    });
                 });
             });
             resolve(true);

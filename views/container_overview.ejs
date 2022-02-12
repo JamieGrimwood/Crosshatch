@@ -6,19 +6,11 @@
 <a id="exitcode">Exit Code: <%= container_info.State.ExitCode %></a><br>
 <a id="id">Container ID: <%= container_info.Id %></a><br>
 
-<button id="start_button" disabled>Start Container</button>
+<button id="start_button" onClick="start()">Start Container</button>
 
-<% if (container_info.State.Running===false) { %>
-    <button disabled>Stop Container</button>
-<% } else { %>
-    <button onclick="stop()">Stop Container</button>
-<% } %>
+<button id="stop_button" disabled onClick="stop()">Stop Container</button>
 
-<% if (container_info.State.Running===false) { %>
-    <button disabled>Kill Container</button>
-<% } else { %>
-    <button onclick="kill()">Kill Container</button>
-<% } %>
+<button id="kill_button" disabled onClick="kill()">Kill Container</button>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -33,14 +25,20 @@
         document.getElementById("state").innerHTML = `State: ${json.State.Status}`;
         if (json.State.Running===true) {
             document.getElementById("start_button").disabled = true;
+        } else {
+            document.getElementById("start_button").disabled = false;
         }
 
         if (json.State.Running===false) {
             document.getElementById("stop_button").disabled = true;
+        } else {
+            document.getElementById("stop_button").disabled = false;
         }
 
         if (json.State.Running===false) {
             document.getElementById("kill_button").disabled = true;
+        } else {
+            document.getElementById("kill_button").disabled = false;
         }
     }
 
@@ -66,9 +64,6 @@
                 title: 'Success',
                 text: 'The start signal has been sent to the contianer.',
                 icon: 'success'
-            }).then(async (result) => {
-                await sleep(500) //Give the container time to start incase they click OK too quickly.
-                location.reload()
             })
         } else {
             Swal.fire({
@@ -89,9 +84,6 @@
                 title: 'Success',
                 text: 'The stop signal has been sent to the contianer.',
                 icon: 'success'
-            }).then(async (result) => {
-                await sleep(500) //Give the container time to start incase they click OK too quickly.
-                location.reload()
             })
         } else {
             Swal.fire({
@@ -107,14 +99,11 @@
     async function kill() {
         const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/kill", { method: "POST", credentials: "same-origin"});
         const response = await res.json();
-        if (response.status === 'STOPPED') {
+        if (response.status === 'KILLED') {
             Swal.fire({
                 title: 'Success',
                 text: 'The kill signal has been sent to the contianer.',
                 icon: 'success'
-            }).then(async (result) => {
-                await sleep(500) //Give the container time to start incase they click OK too quickly.
-                location.reload()
             })
         } else {
             Swal.fire({
