@@ -6,15 +6,17 @@
 
 <button onclick="kill()">Kill All Containers</button>
 
-<% for (var i = 0; i < containers_list.length; i++) { %>
-    <div id="container_<%= containers_list[i].Id %>">
-        <h2><a id="name_<%= containers_list[i].Id %>" href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
-        <a id="image_<%= containers_list[i].Id %>">Image: <%= containers_list[i].Image %></a><br>
-        <a id="state_<%= containers_list[i].Id %>">State: <%= containers_list[i].State %></a><br>
-        <a id="status_<%= containers_list[i].Id %>">Uptime: <%= containers_list[i].Status %></a><br>
-        <a id="id_<%= containers_list[i].Id %>">Container ID: <%= containers_list[i].Id %></a><br>
-    </div>
-<% } %>
+<div id="containers">
+    <% for (var i = 0; i < containers_list.length; i++) { %>
+        <div id="container_<%= containers_list[i].Id %>">
+            <h2><a id="name_<%= containers_list[i].Id %>" href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
+            <a id="image_<%= containers_list[i].Id %>">Image: <%= containers_list[i].Image %></a><br>
+            <a id="state_<%= containers_list[i].Id %>">State: <%= containers_list[i].State %></a><br>
+            <a id="status_<%= containers_list[i].Id %>">Uptime: <%= containers_list[i].Status %></a><br>
+            <a id="id_<%= containers_list[i].Id %>">Container ID: <%= containers_list[i].Id %></a><br>
+        </div>
+    <% } %>
+</div>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -26,7 +28,14 @@
         for (var i = 0; i < json.length; i++) {
             const container = document.getElementById(`container_${json[i].Id}`);
             if (container === null) {
-                
+                const containers = document.getElementById("containers");
+                containers.innerHTML += `<div id="container_${json[i].Id}">
+                    <h2><a id="name_${json[i].Id}" href="/dashboard/container/${json[i].Id}">Name: ${json[i].Names[0]}</a></h2>
+                    <a id="image_${json[i].Id}">Image: ${json[i].Image}</a><br>
+                    <a id="state_${json[i].Id}">State: ${json[i].State}</a><br>
+                    <a id="status_${json[i].Id}">Uptime: ${json[i].Status}</a><br>
+                    <a id="id_${json[i].Id}">Container ID: ${json[i].Id}</a><br>
+                </div>`;
             } else {
                 document.getElementById(`name_${json[i].Id}`).innerHTML = `Name: ${json[i].Names[0]}`
                 document.getElementById(`image_${json[i].Id}`).innerHTML = `Image: ${json[i].Image}`
