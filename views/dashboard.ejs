@@ -7,21 +7,42 @@
 <button onclick="kill()">Kill All Containers</button>
 
 <% for (var i = 0; i < containers_list.length; i++) { %>
-    <h2><a href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
-    <a>Image: <%= containers_list[i].Image %></a><br>
-    <a>State: <%= containers_list[i].State %></a><br>
-    <a>Uptime: <%= containers_list[i].Status %></a><br>
-    <a>Container ID: <%= containers_list[i].Id %></a><br>
+    <div id="container_<%= containers_list[i].Id %>">
+        <h2><a id="name_<%= containers_list[i].Id %>" href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
+        <a id="image_<%= containers_list[i].Id %>">Image: <%= containers_list[i].Image %></a><br>
+        <a id="state_<%= containers_list[i].Id %>">State: <%= containers_list[i].State %></a><br>
+        <a id="status_<%= containers_list[i].Id %>">Uptime: <%= containers_list[i].Status %></a><br>
+        <a id="id_<%= containers_list[i].Id %>">Container ID: <%= containers_list[i].Id %></a><br>
+    </div>
 <% } %>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function sleep(ms) {
-        return new Promise((resolve) => {
-            setTimeout(resolve, ms);
-        });
+    const socket = new WebSocket(`ws://${window.location.host}${window.location.pathname}`);
+
+    socket.onmessage = function (event) {
+        const json = JSON.parse(event.data)
+        console.log(json)
+
+        for (var i = 0; i < json.length; i++) {
+            const container = document.getElementById(`container_${json[i].Id}`);
+            if (container === null) {
+                
+            } else {
+                document.getElementById(`name_${json[i].Id}`).innerHTML = `Name: ${json[i].Names[0]}`
+                document.getElementById(`image_${json[i].Id}`).innerHTML = `Image: ${json[i].Image}`
+                document.getElementById(`state_${json[i].Id}`).innerHTML = `State: ${json[i].State}`
+                document.getElementById(`status_${json[i].Id}`).innerHTML = `Status: ${json[i].Status}`
+                document.getElementById(`id_${json[i].Id}`).innerHTML = `Container ID: ${json[i].Id}`
+            }
+        }
     }
+
+    setInterval(function() {
+        socket.send("data")
+    }, 1000);
 </script>
+
 <script>
     async function start() {
         const res = await fetch("/dashboard/container/all/actions/start", { method: "POST", credentials: "same-origin"});
@@ -31,9 +52,6 @@
                 title: 'Success',
                 text: 'The startup signal has been sent to all contianers. Please give them a minute to boot.',
                 icon: 'success'
-            }).then(async (result) => {
-                await sleep(500) //Give the container time to start incase they click OK too quickly.
-                location.reload()
             })
         } else {
             Swal.fire({
@@ -54,9 +72,6 @@
                 title: 'Success',
                 text: 'The stop signal has been sent to all contianers. Please give them a minute to shutdown.',
                 icon: 'success'
-            }).then(async (result) => {
-                await sleep(500) //Give the container time to start incase they click OK too quickly.
-                location.reload()
             })
         } else {
             Swal.fire({
@@ -77,9 +92,6 @@
                 title: 'Success',
                 text: 'The kill signal has been sent to all contianers. Please give them a minute to shutdown.',
                 icon: 'success'
-            }).then(async (result) => {
-                await sleep(500) //Give the container time to start incase they click OK too quickly.
-                location.reload()
             })
         } else {
             Swal.fire({

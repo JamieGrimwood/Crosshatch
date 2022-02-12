@@ -6,11 +6,11 @@
 <a id="exitcode">Exit Code: <%= container_info.State.ExitCode %></a><br>
 <a id="id">Container ID: <%= container_info.Id %></a><br>
 
-<button id="start_button" onClick="start()">Start Container</button>
+<button id="start_button" onClick="start()" disabled>Start Container</button>
 
-<button id="stop_button" disabled onClick="stop()">Stop Container</button>
+<button id="stop_button" onClick="stop()" disabled>Stop Container</button>
 
-<button id="kill_button" disabled onClick="kill()">Kill Container</button>
+<button id="kill_button" onClick="kill()" disabled>Kill Container</button>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -23,6 +23,7 @@
         document.getElementById("name").innerHTML = `Name: ${json.Name}`;
         document.getElementById("image").innerHTML = `Image: ${json.Image}`;
         document.getElementById("state").innerHTML = `State: ${json.State.Status}`;
+        document.getElementById("exitcode").innerHTML = `Exit Code: ${json.State.ExitCode}`;
         if (json.State.Running===true) {
             document.getElementById("start_button").disabled = true;
         } else {

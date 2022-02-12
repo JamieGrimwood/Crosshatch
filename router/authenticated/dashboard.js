@@ -9,6 +9,13 @@ router.get('/dashboard', async (req, res) => {
     res.render("dashboard", { containers_list: containers })
 });
 
+router.ws('/dashboard', async (ws, req) => {
+    ws.on('message', async function (msg) {
+        const containers = await controller.listAll().catch(error => { ws.send(error) })
+        ws.send(JSON.stringify(containers))
+    });
+})
+
 router.get('/dashboard/container/:id', async (req, res) => {
     if (!req.params.id) return res.send("Unknown container")
     const container = await controller.getInfo(req.params.id).catch(error => { return res.send("Invalid container ID") })
