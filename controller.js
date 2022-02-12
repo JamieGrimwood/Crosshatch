@@ -16,6 +16,7 @@ module.exports = {
             const container = await docker.getContainer(id);
             container.inspect(function (err, data) {
                 if (err) return reject(err)
+                if (data.Id != id) reject("notvalid")
 
                 resolve(data)
             });
