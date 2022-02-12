@@ -13,5 +13,5 @@ Crosshatch is an opensource software that allows controlling docker containers f
 EJS send a console error when visiting an unknown container ID, even though it shouldn't be trying to render the page. No impact on dashboard functionality.
 
 ## Todo:
-1. Make the css nicer
-2. Add more features
+- Make the css nicer
+- Add more features
