@@ -1,18 +1,12 @@
 <a href="/dashboard">Go Home</a><br></br>
 
-<h1>Name: <%= container_info.Name %></h1>
-<a>Image: <%= container_info.Image %></a><br>
-<a>State: <%= container_info.State.Status %></a><br>
-<% if (container_info.State.Running===false) { %>
-    <a>Exit Code: <%= container_info.State.ExitCode %></a><br>
-<% } %>
-<a>Container ID: <%= container_info.Id %></a><br>
+<h1 id="name">Name: <%= container_info.Name %></h1>
+<a id="image">Image: <%= container_info.Image %></a><br>
+<a id="state">State: <%= container_info.State.Status %></a><br>
+<a id="exitcode">Exit Code: <%= container_info.State.ExitCode %></a><br>
+<a id="id">Container ID: <%= container_info.Id %></a><br>
 
-<% if (container_info.State.Running===true) { %>
-    <button disabled>Start Container</button>
-<% } else { %>
-    <button onclick="start()">Start Container</button>
-<% } %>
+<button id="start_button" disabled>Start Container</button>
 
 <% if (container_info.State.Running===false) { %>
     <button disabled>Stop Container</button>
@@ -27,6 +21,34 @@
 <% } %>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const socket = new WebSocket(`ws://${window.location.host}${window.location.pathname}`);
+
+    socket.onmessage = function (event) {
+        const json = JSON.parse(event.data)
+        console.log(json)
+        document.getElementById("name").innerHTML = `Name: ${json.Name}`;
+        document.getElementById("image").innerHTML = `Image: ${json.Image}`;
+        document.getElementById("state").innerHTML = `State: ${json.State.Status}`;
+        if (json.State.Running===true) {
+            document.getElementById("start_button").disabled = true;
+        }
+
+        if (json.State.Running===false) {
+            document.getElementById("stop_button").disabled = true;
+        }
+
+        if (json.State.Running===false) {
+            document.getElementById("kill_button").disabled = true;
+        }
+    }
+
+    setInterval(function() {
+        socket.send("data")
+    }, 1000);
+</script>
+
 <script>
     function sleep(ms) {
         return new Promise((resolve) => {
@@ -34,6 +56,7 @@
         });
     }
 </script>
+
 <script>
     async function start() {
         const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/start", { method: "POST", credentials: "same-origin"});

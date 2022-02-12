@@ -3,7 +3,12 @@ const session = require('express-session');
 const app = express();
 const path = require('path');
 const settings = require('./settings.json')
-const controller = require('./controller')
+const expressWs = require('express-ws')
+expressWs(app)
+
+app.ws("/", (ws, req) => {
+  console.log(req)
+})
 
 app.set('view engine', 'ejs');
 
