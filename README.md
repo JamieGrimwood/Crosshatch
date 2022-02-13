@@ -15,3 +15,4 @@ EJS send a console error when visiting an unknown container ID, even though it s
 ## Todo:
 - Make the css nicer
 - Add more features
+- Make console log to a file each startup so it can be served to the frontend when needed
