@@ -45,11 +45,10 @@ module.exports = {
                             if (err) reject(err);
                         });
                     }
+                    const messageFile = fs.createWriteStream(`./logs/${id}.txt`, {
+                        flags: "a", // 'a' means appending (old data will be preserved)
+                    })
                     stream.on('data', chunk => {
-                        const messageFile = fs.createWriteStream(`./logs/${id}.txt`, {
-                            flags: "a", // 'a' means appending (old data will be preserved)
-                        })
-
                         messageFile.write(chunk.toString("utf8"))
                     })
                 }
@@ -80,11 +79,14 @@ module.exports = {
                 reject(err.statusCode)
             })
             if (fs.existsSync(`./logs/${id}.txt`)) {
-                fs.unlink(`./logs/${id}.txt`, (err) => {
+                await fs.unlink(`./logs/${id}.txt`, (err) => {
+                    console.log(err)
                     if (err) {
                         reject(err)
                     }
+                    console.log("It should be deleted")
                 })
+                console.log("It exists")
             }
             resolve(true)
         })
@@ -95,7 +97,7 @@ module.exports = {
                 if (err) reject(false);
                 containers.forEach(function (containerInfo) {
                     const container = docker.getContainer(containerInfo.Id);
-                    
+
                     container.start().catch(error => {
                         if (error.statusCode === 304) return
                     });
