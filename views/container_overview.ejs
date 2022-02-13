@@ -77,6 +77,16 @@
         scrollback: 1000,
         tabStopWidth: 8,
     })
+
+    function logSuccess(data) {
+        term.writeln("\u001b[32m [CROSSHATCH] " + data + " \u001b[0m")
+    }
+    function logInfo(data) {
+        term.writeln("\u001b[36m [CROSSHATCH] " + data + " \u001b[0m")
+    }
+    function logError(data) {
+        term.writeln("\u001b[31m [CROSSHATCH] " + data + " \u001b[0m")
+    }
     term.open(document.getElementById('terminal'));
     consoleSocket.onmessage = function (event) {
         term.writeln(event.data.toString("utf8"))
@@ -97,12 +107,14 @@
                 text: 'The start signal has been sent to the contianer.',
                 icon: 'success'
             })
+            logInfo("Starting container...")
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Uh Oh!',
                 text: 'Something went wrong when sending the start signal to the container! Please try again later.',
             })
+            logError("Something went wrong when sending the start signal to the container! Please try again later.")
         }
     }
 </script>
@@ -117,12 +129,14 @@
                 text: 'The stop signal has been sent to the contianer.',
                 icon: 'success'
             })
+            logInfo("Container stopped.")
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Uh Oh!',
                 text: 'Something went wrong when sending the stop signal to the container! Please try again later.',
             })
+            logError("Something went wrong when sending the stop signal to the container! Please try again later.")
         }
     }
 </script>
@@ -137,12 +151,14 @@
                 text: 'The kill signal has been sent to the contianer.',
                 icon: 'success'
             })
+            logInfo("Container killed.")
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Uh Oh!',
                 text: 'Something went wrong when sending the kill signal to the container! Please try again later.',
             })
+            logError("Something went wrong when sending the kill signal to the container! Please try again later.")
         }
     }
 </script>
