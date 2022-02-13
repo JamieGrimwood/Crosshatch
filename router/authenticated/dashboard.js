@@ -1,3 +1,5 @@
+const fs = require('fs');
+const readline = require('readline');
 const express = require('express');
 const router = express.Router();
 
@@ -84,6 +86,25 @@ router.post('/dashboard/container/:id/actions/kill', async (req, res) => {
         await controller.killContainer(req.params.id).catch(error => { return res.send("Invalid container ID") })
     }
     return res.json({ "status": "KILLED" })
+});
+
+router.ws('/dashboard/container/:id/actions/getConsole', async (ws, req) => {
+    if (!req.params.id) return res.send("No container specified")
+    if (fs.existsSync(`./logs/${req.params.id}.txt`)) {
+        const fileStream = fs.createReadStream(`./logs/${req.params.id}.txt`);
+
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+
+        for await (const line of rl) {
+            ws.send(line)
+        }
+        ws.close()
+    } else {
+        ws.send("No past logs found.")
+    }
 });
 
 module.exports = router;

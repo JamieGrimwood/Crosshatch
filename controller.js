@@ -1,3 +1,4 @@
+const fs = require("fs");
 const Docker = require('dockerode');
 const docker = new Docker();
 
@@ -36,20 +37,51 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
             container.start()
+            container.attach(
+                { stream: true, stdout: true, stderr: true },
+                (err, stream) => {
+                    if (fs.existsSync(`./logs/${id}.txt`) === false) {
+                        fs.appendFile(`./logs/${id}.txt`, '', function (err) {
+                            if (err) reject(err);
+                        });
+                    }
+                    stream.on('data', chunk => {
+                        const messageFile = fs.createWriteStream(`./logs/${id}.txt`, {
+                            flags: "a", // 'a' means appending (old data will be preserved)
+                        })
+
+                        messageFile.write(chunk.toString("utf8"))
+                    })
+                }
+            );
             resolve(true)
         })
     },
     stopContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            container.stop()
+            container.stop().catch(err => {
+                reject(err.statusCode)
+            })
+            fs.unlink(`./logs/${id}.txt`, (err) => {
+                if (err) {
+                    reject(err)
+                }
+            })
             resolve(true)
         })
     },
     killContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
-            container.kill()
+            container.kill().catch(err => {
+                reject(err.statusCode)
+            })
+            fs.unlink(`./logs/${id}.txt`, (err) => {
+                if (err) {
+                    reject(err)
+                }
+            })
             resolve(true)
         })
     },

@@ -59,17 +59,17 @@
 </script>
 
 <script>
-    const consoleSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/console`);
+    let consoleSocket
+    async function reconnect() {
+        consoleSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/console`);
+    }
+    reconnect()
 
-    consoleSocket.onopen = function (event) {
-        if (<%= container_info.State.Running %> === true) {
-            const socketStatus = document.getElementById('socketStatus');
-            socketStatus.innerHTML = 'Console Error! Due to dockerode limitations, please stop the container, reload the page and then start the container to see the console.';
-        } else {
-            const socketStatus = document.getElementById('socketStatus');
-            socketStatus.innerHTML = 'Console Connected!';
-            socketStatus.style = 'color:green';
-        }
+    consoleSocket.onopen = async function (event) {
+        await getLogs()
+        const socketStatus = document.getElementById('socketStatus');
+        socketStatus.innerHTML = 'Console Connected!';
+        socketStatus.style = 'color:green';
     }
 
     const term = new Terminal({
@@ -77,6 +77,16 @@
         scrollback: 1000,
         tabStopWidth: 8,
     })
+
+    term.open(document.getElementById('terminal'));
+
+    consoleSocket.onmessage = function (event) {
+        term.writeln(event.data.toString("utf8"))
+    };
+
+    async function closeSocket() {
+        consoleSocket.close()
+    }
 
     function logSuccess(data) {
         term.writeln("\u001b[32m [CROSSHATCH] " + data + " \u001b[0m")
@@ -87,18 +97,24 @@
     function logError(data) {
         term.writeln("\u001b[31m [CROSSHATCH] " + data + " \u001b[0m")
     }
-    term.open(document.getElementById('terminal'));
-    consoleSocket.onmessage = function (event) {
-        term.writeln(event.data.toString("utf8"))
-        /*
-        const console = document.getElementById('console');
-        console.innerHTML += event.data.toString("utf8");
-        */
-    };
+
+    async function getLogs() {
+        const logsSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/actions/getConsole`);
+        logsSocket.onmessage = function (event) {
+            console.log("connected")
+            if (event.data === "No past logs found.") {
+                logError("No past logs found.")
+            } else {
+                console.log(event.data)
+                term.writeln(event.data.toString("utf8"))
+            }
+        };
+    }
 </script>
 
 <script>
     async function start() {
+        reconnect()
         const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/start", { method: "POST", credentials: "same-origin" });
         const response = await res.json();
         if (response.status === 'STARTED') {
@@ -115,6 +131,7 @@
                 text: 'Something went wrong when sending the start signal to the container! Please try again later.',
             })
             logError("Something went wrong when sending the start signal to the container! Please try again later.")
+            closeSocket()
         }
     }
 </script>
@@ -130,6 +147,7 @@
                 icon: 'success'
             })
             logInfo("Container stopped.")
+            closeSocket()
         } else {
             Swal.fire({
                 icon: 'error',
@@ -152,6 +170,7 @@
                 icon: 'success'
             })
             logInfo("Container killed.")
+            closeSocket()
         } else {
             Swal.fire({
                 icon: 'error',
