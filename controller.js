@@ -63,11 +63,13 @@ module.exports = {
             container.stop().catch(err => {
                 reject(err.statusCode)
             })
-            fs.unlink(`./logs/${id}.txt`, (err) => {
-                if (err) {
-                    reject(err)
-                }
-            })
+            if (fs.existsSync(`./logs/${id}.txt`)) {
+                fs.unlink(`./logs/${id}.txt`, (err) => {
+                    if (err) {
+                        reject(err)
+                    }
+                })
+            }
             resolve(true)
         })
     },
@@ -77,11 +79,13 @@ module.exports = {
             container.kill().catch(err => {
                 reject(err.statusCode)
             })
-            fs.unlink(`./logs/${id}.txt`, (err) => {
-                if (err) {
-                    reject(err)
-                }
-            })
+            if (fs.existsSync(`./logs/${id}.txt`)) {
+                fs.unlink(`./logs/${id}.txt`, (err) => {
+                    if (err) {
+                        reject(err)
+                    }
+                })
+            }
             resolve(true)
         })
     },
@@ -90,9 +94,28 @@ module.exports = {
             docker.listContainers({ all: true }, function (err, containers) {
                 if (err) reject(false);
                 containers.forEach(function (containerInfo) {
-                    docker.getContainer(containerInfo.Id).start().catch(error => {
+                    const container = docker.getContainer(containerInfo.Id);
+                    
+                    container.start().catch(error => {
                         if (error.statusCode === 304) return
                     });
+                    container.attach(
+                        { stream: true, stdout: true, stderr: true },
+                        (err, stream) => {
+                            if (fs.existsSync(`./logs/${containerInfo.Id}.txt`) === false) {
+                                fs.appendFile(`./logs/${containerInfo.Id}.txt`, '', function (err) {
+                                    if (err) reject(err);
+                                });
+                            }
+                            stream.on('data', chunk => {
+                                const messageFile = fs.createWriteStream(`./logs/${containerInfo.Id}.txt`, {
+                                    flags: "a", // 'a' means appending (old data will be preserved)
+                                })
+
+                                messageFile.write(chunk.toString("utf8"))
+                            })
+                        }
+                    );
                 });
             });
             resolve(true);
@@ -106,6 +129,13 @@ module.exports = {
                     docker.getContainer(containerInfo.Id).stop().catch(error => {
                         if (error.statusCode === 304) return
                     });
+                    if (fs.existsSync(`./logs/${containerInfo.Id}.txt`)) {
+                        fs.unlink(`./logs/${containerInfo.Id}.txt`, (err) => {
+                            if (err) {
+                                reject(err)
+                            }
+                        })
+                    }
                 });
             });
             resolve(true);
@@ -119,6 +149,13 @@ module.exports = {
                     docker.getContainer(containerInfo.Id).kill().catch(error => {
                         if (error.statusCode === 409) return
                     });
+                    if (fs.existsSync(`./logs/${containerInfo.Id}.txt`)) {
+                        fs.unlink(`./logs/${containerInfo.Id}.txt`, (err) => {
+                            if (err) {
+                                reject(err)
+                            }
+                        })
+                    }
                 });
             });
             resolve(true);

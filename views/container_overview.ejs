@@ -59,19 +59,6 @@
 </script>
 
 <script>
-    let consoleSocket
-    async function reconnect() {
-        consoleSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/console`);
-    }
-    reconnect()
-
-    consoleSocket.onopen = async function (event) {
-        await getLogs()
-        const socketStatus = document.getElementById('socketStatus');
-        socketStatus.innerHTML = 'Console Connected!';
-        socketStatus.style = 'color:green';
-    }
-
     const term = new Terminal({
         cursorBlink: false,
         scrollback: 1000,
@@ -80,9 +67,21 @@
 
     term.open(document.getElementById('terminal'));
 
-    consoleSocket.onmessage = function (event) {
-        term.writeln(event.data.toString("utf8"))
-    };
+    let consoleSocket
+    async function reconnect() {
+        consoleSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/console`);
+        
+        consoleSocket.onopen = async function (event) {
+            await getLogs()
+            const socketStatus = document.getElementById('socketStatus');
+            socketStatus.innerHTML = 'Console Connected!';
+            socketStatus.style = 'color:green';
+        }
+        consoleSocket.onmessage = function (event) {
+            term.writeln(event.data.toString("utf8"))
+        };
+    }
+    reconnect()
 
     async function closeSocket() {
         consoleSocket.close()
