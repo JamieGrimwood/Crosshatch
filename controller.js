@@ -1,4 +1,3 @@
-const fs = require("fs");
 const Docker = require('dockerode');
 const docker = new Docker();
 
@@ -37,22 +36,6 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
             container.start()
-            container.attach(
-                { stream: true, stdout: true, stderr: true },
-                (err, stream) => {
-                    if (fs.existsSync(`./logs/${id}.txt`) === false) {
-                        fs.appendFile(`./logs/${id}.txt`, '', function (err) {
-                            if (err) reject(err);
-                        });
-                    }
-                    const messageFile = fs.createWriteStream(`./logs/${id}.txt`, {
-                        flags: "a", // 'a' means appending (old data will be preserved)
-                    })
-                    stream.on('data', chunk => {
-                        messageFile.write(chunk.toString("utf8"))
-                    })
-                }
-            );
             resolve(true)
         })
     },
@@ -62,13 +45,6 @@ module.exports = {
             container.stop().catch(err => {
                 reject(err.statusCode)
             })
-            if (fs.existsSync(`./logs/${id}.txt`)) {
-                fs.unlink(`./logs/${id}.txt`, (err) => {
-                    if (err) {
-                        reject(err)
-                    }
-                })
-            }
             resolve(true)
         })
     },
@@ -78,16 +54,6 @@ module.exports = {
             container.kill().catch(err => {
                 reject(err.statusCode)
             })
-            if (fs.existsSync(`./logs/${id}.txt`)) {
-                await fs.unlink(`./logs/${id}.txt`, (err) => {
-                    console.log(err)
-                    if (err) {
-                        reject(err)
-                    }
-                    console.log("It should be deleted")
-                })
-                console.log("It exists")
-            }
             resolve(true)
         })
     },
@@ -101,23 +67,6 @@ module.exports = {
                     container.start().catch(error => {
                         if (error.statusCode === 304) return
                     });
-                    container.attach(
-                        { stream: true, stdout: true, stderr: true },
-                        (err, stream) => {
-                            if (fs.existsSync(`./logs/${containerInfo.Id}.txt`) === false) {
-                                fs.appendFile(`./logs/${containerInfo.Id}.txt`, '', function (err) {
-                                    if (err) reject(err);
-                                });
-                            }
-                            stream.on('data', chunk => {
-                                const messageFile = fs.createWriteStream(`./logs/${containerInfo.Id}.txt`, {
-                                    flags: "a", // 'a' means appending (old data will be preserved)
-                                })
-
-                                messageFile.write(chunk.toString("utf8"))
-                            })
-                        }
-                    );
                 });
             });
             resolve(true);
@@ -131,13 +80,6 @@ module.exports = {
                     docker.getContainer(containerInfo.Id).stop().catch(error => {
                         if (error.statusCode === 304) return
                     });
-                    if (fs.existsSync(`./logs/${containerInfo.Id}.txt`)) {
-                        fs.unlink(`./logs/${containerInfo.Id}.txt`, (err) => {
-                            if (err) {
-                                reject(err)
-                            }
-                        })
-                    }
                 });
             });
             resolve(true);
@@ -151,13 +93,6 @@ module.exports = {
                     docker.getContainer(containerInfo.Id).kill().catch(error => {
                         if (error.statusCode === 409) return
                     });
-                    if (fs.existsSync(`./logs/${containerInfo.Id}.txt`)) {
-                        fs.unlink(`./logs/${containerInfo.Id}.txt`, (err) => {
-                            if (err) {
-                                reject(err)
-                            }
-                        })
-                    }
                 });
             });
             resolve(true);

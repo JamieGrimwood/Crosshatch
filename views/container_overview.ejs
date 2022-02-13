@@ -18,9 +18,9 @@
 
 <button id="kill_button" onClick="kill()" disabled>Kill Container</button>
 
-<p id="socketStatus" style="color:red">Connecting to console...</p>
-
 <div id="terminal"></div>
+
+
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -59,59 +59,6 @@
 </script>
 
 <script>
-    const term = new Terminal({
-        cursorBlink: false,
-        scrollback: 1000,
-        tabStopWidth: 8,
-    })
-
-    term.open(document.getElementById('terminal'));
-
-    let consoleSocket
-    async function reconnect() {
-        consoleSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/console`);
-        
-        consoleSocket.onopen = async function (event) {
-            await getLogs()
-            const socketStatus = document.getElementById('socketStatus');
-            socketStatus.innerHTML = 'Console Connected!';
-            socketStatus.style = 'color:green';
-        }
-        consoleSocket.onmessage = function (event) {
-            term.writeln(event.data.toString("utf8"))
-        };
-    }
-    reconnect()
-
-    async function closeSocket() {
-        consoleSocket.close()
-    }
-
-    function logSuccess(data) {
-        term.writeln("\u001b[32m [CROSSHATCH] " + data + " \u001b[0m")
-    }
-    function logInfo(data) {
-        term.writeln("\u001b[36m [CROSSHATCH] " + data + " \u001b[0m")
-    }
-    function logError(data) {
-        term.writeln("\u001b[31m [CROSSHATCH] " + data + " \u001b[0m")
-    }
-
-    async function getLogs() {
-        const logsSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}/actions/getConsole`);
-        logsSocket.onmessage = function (event) {
-            console.log("connected")
-            if (event.data === "No past logs found.") {
-                logError("No past logs found.")
-            } else {
-                console.log(event.data)
-                term.writeln(event.data.toString("utf8"))
-            }
-        };
-    }
-</script>
-
-<script>
     async function start() {
         reconnect()
         const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/start", { method: "POST", credentials: "same-origin" });
@@ -122,15 +69,12 @@
                 text: 'The start signal has been sent to the contianer.',
                 icon: 'success'
             })
-            logInfo("Starting container...")
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Uh Oh!',
                 text: 'Something went wrong when sending the start signal to the container! Please try again later.',
             })
-            logError("Something went wrong when sending the start signal to the container! Please try again later.")
-            closeSocket()
         }
     }
 </script>
@@ -145,15 +89,12 @@
                 text: 'The stop signal has been sent to the contianer.',
                 icon: 'success'
             })
-            logInfo("Container stopped.")
-            closeSocket()
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Uh Oh!',
                 text: 'Something went wrong when sending the stop signal to the container! Please try again later.',
             })
-            logError("Something went wrong when sending the stop signal to the container! Please try again later.")
         }
     }
 </script>
@@ -168,15 +109,12 @@
                 text: 'The kill signal has been sent to the contianer.',
                 icon: 'success'
             })
-            logInfo("Container killed.")
-            closeSocket()
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Uh Oh!',
                 text: 'Something went wrong when sending the kill signal to the container! Please try again later.',
             })
-            logError("Something went wrong when sending the kill signal to the container! Please try again later.")
         }
     }
 </script>
