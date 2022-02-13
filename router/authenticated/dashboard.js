@@ -36,6 +36,26 @@ router.ws('/dashboard/container/:id', async (ws, req) => {
     });
 })
 
+router.ws('/dashboard/container/:id/console', async (ws, req) => {
+    if (!req.params.id) {
+        ws.send("No Container Specified")
+        return ws.close()
+    }
+    const container = await controller.getContainer(req.params.id).catch(error => {
+        ws.send("Invalid container ID")
+        return ws.close()
+    })
+
+    container.attach(
+        { stream: true, stdout: true, stderr: true },
+        (err, stream) => {
+            stream.on('data', chunk => {
+                ws.send(chunk.toString("utf8"))
+            });
+        }
+    );
+})
+
 router.post('/dashboard/container/:id/actions/start', async (req, res) => {
     if (!req.params.id) return res.send("No container specified")
     if (req.params.id === "all") {

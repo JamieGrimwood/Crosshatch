@@ -22,6 +22,16 @@ module.exports = {
             });
         });
     },
+    getContainer: async (id) => {
+        return new Promise(async (resolve, reject) => {
+            const container = await docker.getContainer(id);
+            container.inspect(function (err, data) {
+                if (err) return reject(err)
+                if (data.Id != id) reject("notvalid")
+            });
+            resolve(container)
+        });
+    },
     startContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = await docker.getContainer(id);
@@ -82,6 +92,7 @@ module.exports = {
             resolve(true);
         })
     },
+    // The two below are not used yet.
     removeContainer: async (id) => {
         return new Promise(async (resolve, reject) => {
             const container = docker.getContainer(id);
