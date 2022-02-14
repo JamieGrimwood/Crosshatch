@@ -21,8 +21,6 @@ app.use(session({
   saveUninitialized: true
 }));
 
-const year = new Date().getFullYear();
-
 axios.get('https://api.github.com/repos/JamieGrimwood/Crosshatch/releases/latest').then(function (response) {
   if (response.data.tag_name === "0.0.1") {
     console.log(chalk.cyanBright(textSync('Crosshatch', { horizontalLayout: 'fitted' })));
