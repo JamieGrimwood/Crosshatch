@@ -62,7 +62,7 @@ router.ws('/dashboard/container/:id/exec', async (ws, req) => {
         container.exec(options, async function (err, exec) {
             if (err) {
                 if (err.statusCode = 409) {
-                    await controller.startContainer(req.params.id)
+                    return ws.send("\u001b[31;1m[CROSSHATCH] Container not running. Please start it to be able to use the EXEC console.\u001b[0m")
                 }
             }
             const attach_opts = { 'Detach': false, 'Tty': true, stream: true, stdin: true, stdout: true, stderr: true };
