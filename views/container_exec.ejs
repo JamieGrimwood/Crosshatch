@@ -1,24 +1,103 @@
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://unpkg.com/xterm@4.17.0/lib/xterm.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
+    integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 <a href="/dashboard/container/<%= container_info.Id %>">Go Back</a><br></br>
 
-<h1 id="name">Name: <%= container_info.Name %></h1>
+<h1 id="name">Name: <%= container_info.Name %>
+</h1>
 
-<form name="exec_select" onsubmit="exec()" >
-    <label for="exec_command">Exec Command:</label>
-    <select id="exec_type" name="exec_type" required="true">
-        <option value="bash">/bin/bash</option>
-        <option value="sh">/bin/sh</option>
-        <option value="ash">/bin/ash</option>
-    </select>
-    <input type="submit" value="Submit">
-</form>
+<a>Websocket Status: <a id="socketStatus" style="color:orange">Connecting...</a></a>
 
-<div id="terminal" class="hidden"></div>
+<div id="terminal"></div>
 
 <script>
-    async function exec() {
-        event.preventDefault()
-        const form = new FormData(exec_select)
-        const type = form.get(exec_type)
-        console.log(type)
+    let consoleSocket
+    async function connect() {
+        consoleSocket = new WebSocket(`ws://${window.location.host}${window.location.pathname}`);
+
+        consoleSocket.onopen = function (event) {
+            const socketStatus = document.getElementById('socketStatus');
+            socketStatus.innerHTML = 'Connected';
+            socketStatus.style = 'color:green';
+        }
+
+        consoleSocket.onclose = function (event) {
+            const socketStatus = document.getElementById('socketStatus');
+            socketStatus.innerHTML = 'Disconnected';
+            socketStatus.style = 'color:red';
+        };
+
+        consoleSocket.onmessage = async function (event) {
+            await term.write(event.data)
+            term.prompt()
+        }
     }
+    connect()
+
+    const term = new Terminal({
+        cursorBlink: false,
+        scrollback: 1000,
+        tabStopWidth: 8,
+    })
+
+    term.open(document.getElementById('terminal'), false);
+
+    var shellprompt = '# ';
+
+    term.prompt = function () {
+        term.write('\r\n' + shellprompt);
+    };
+
+    term.setOption('cursorBlink', true);
+
+    var cmd = '';
+
+    var ctrlDown = false,
+        ctrlKey = 17,
+        cmdKey = 91
+
+    $(document).keydown(function (e) {
+        if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
+    }).keyup(function (e) {
+        if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = false;
+    });
+
+    term.onKey(key => {
+        const char = key.domEvent.key;
+        if (char === "Enter") {
+            consoleSocket.send(cmd)
+            cmd = ''
+            term.write('\r\n')
+        } else if (char === "Backspace") {
+            if (term._core.buffer.x > 2) {
+                cmd = cmd.substring(0, cmd.length - 1);
+                term.write("\b \b");
+            }
+        } else if (char === "Escape") {
+            return;
+        } else if (char === "c") {
+            if (ctrlDown === true) {
+                cmd = ''
+                consoleSocket.close()
+                term.clear()
+                connect()
+                term.clear()
+            } else {
+                cmd += char;
+                term.write(char);
+            }
+        } else {
+            cmd += char;
+            term.write(char);
+        }
+    });
 </script>
+
+<style>
+    body {
+        font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+</style>

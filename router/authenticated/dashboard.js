@@ -1,5 +1,3 @@
-const fs = require('fs');
-const readline = require('readline');
 const express = require('express');
 const router = express.Router();
 
@@ -42,6 +40,42 @@ router.get('/dashboard/container/:id/exec', async (req, res) => {
     if (!req.params.id) return res.send("Unknown container")
     const container = await controller.getInfo(req.params.id).catch(error => { return res.send("Invalid container ID") })
     res.render("container_exec", { container_info: container })
+})
+
+router.ws('/dashboard/container/:id/exec', async (ws, req) => {
+    console.log("Connected")
+    if (!req.params.id) {
+        ws.send("No Container Specified")
+        return ws.close()
+    }
+    ws.send("\u001b[32m[CROSSHATCH] Connection established.\u001b[0m")
+    const container = await controller.getContainer(req.params.id).catch(error => {
+        ws.send("Invalid container ID")
+        return ws.close()
+    })
+    ws.on('message', function (msg) {
+        const options = {
+            'AttachStdout': true,
+            'AttachStderr': true,
+            'Tty': true,
+            Cmd: ["/bin/bash", "-c", msg]
+        };
+        container.exec(options, async function (err, exec) {
+            if (err) {
+                if (err.statusCode = 409) {
+                    await controller.startContainer(req.params.id)
+                }
+            }
+            const attach_opts = { 'Detach': false, 'Tty': true, stream: true, stdin: true, stdout: true, stderr: true };
+            exec.start(attach_opts, function (err, stream) {
+                stream.on('data', chunk => {
+                    ws.send(chunk.toString("utf8"))
+                    console.log(ws.readyState)
+                    if (ws.readyState != 1) return stream.destroy();
+                })
+            });
+        });
+    });
 })
 
 router.post('/dashboard/container/:id/actions/start', async (req, res) => {

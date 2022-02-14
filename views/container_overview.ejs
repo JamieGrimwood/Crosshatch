@@ -58,7 +58,6 @@
 
 <script>
     async function start() {
-        reconnect()
         const res = await fetch("/dashboard/container/<%= container_info.Id %>/actions/start", { method: "POST", credentials: "same-origin" });
         const response = await res.json();
         if (response.status === 'STARTED') {
