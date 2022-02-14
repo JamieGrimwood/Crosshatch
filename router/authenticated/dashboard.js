@@ -43,7 +43,6 @@ router.get('/dashboard/container/:id/exec', async (req, res) => {
 })
 
 router.ws('/dashboard/container/:id/exec', async (ws, req) => {
-    console.log("Connected")
     if (!req.params.id) {
         ws.send("No Container Specified")
         return ws.close()
@@ -70,7 +69,6 @@ router.ws('/dashboard/container/:id/exec', async (ws, req) => {
             exec.start(attach_opts, function (err, stream) {
                 stream.on('data', chunk => {
                     ws.send(chunk.toString("utf8"))
-                    console.log(ws.readyState)
                     if (ws.readyState != 1) return stream.destroy();
                 })
             });
