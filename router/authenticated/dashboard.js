@@ -38,24 +38,10 @@ router.ws('/dashboard/container/:id', async (ws, req) => {
     });
 })
 
-router.ws('/dashboard/container/:id/console', async (ws, req) => {
-    if (!req.params.id) {
-        ws.send("No Container Specified")
-        return ws.close()
-    }
-    const container = await controller.getContainer(req.params.id).catch(error => {
-        ws.send("Invalid container ID")
-        return ws.close()
-    })
-
-    container.attach(
-        { stream: true, stdout: true, stderr: true },
-        (err, stream) => {
-            stream.on('data', chunk => {
-                ws.send(chunk.toString("utf8"))
-            });
-        }
-    );
+router.get('/dashboard/container/:id/exec', async (req, res) => {
+    if (!req.params.id) return res.send("Unknown container")
+    const container = await controller.getInfo(req.params.id).catch(error => { return res.send("Invalid container ID") })
+    res.render("container_exec", { container_info: container })
 })
 
 router.post('/dashboard/container/:id/actions/start', async (req, res) => {
@@ -86,25 +72,6 @@ router.post('/dashboard/container/:id/actions/kill', async (req, res) => {
         await controller.killContainer(req.params.id).catch(error => { return res.send("Invalid container ID") })
     }
     return res.json({ "status": "KILLED" })
-});
-
-router.ws('/dashboard/container/:id/actions/getConsole', async (ws, req) => {
-    if (!req.params.id) return res.send("No container specified")
-    if (fs.existsSync(`./logs/${req.params.id}.txt`)) {
-        const fileStream = fs.createReadStream(`./logs/${req.params.id}.txt`);
-
-        const rl = readline.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity
-        });
-
-        for await (const line of rl) {
-            ws.send(line)
-        }
-        ws.close()
-    } else {
-        ws.send("No past logs found.")
-    }
 });
 
 module.exports = router;

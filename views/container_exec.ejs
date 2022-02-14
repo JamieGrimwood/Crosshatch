@@ -1,0 +1,24 @@
+<a href="/dashboard/container/<%= container_info.Id %>">Go Back</a><br></br>
+
+<h1 id="name">Name: <%= container_info.Name %></h1>
+
+<form name="exec_select" onsubmit="exec()" >
+    <label for="exec_command">Exec Command:</label>
+    <select id="exec_type" name="exec_type" required="true">
+        <option value="bash">/bin/bash</option>
+        <option value="sh">/bin/sh</option>
+        <option value="ash">/bin/ash</option>
+    </select>
+    <input type="submit" value="Submit">
+</form>
+
+<div id="terminal" class="hidden"></div>
+
+<script>
+    async function exec() {
+        event.preventDefault()
+        const form = new FormData(exec_select)
+        const type = form.get(exec_type)
+        console.log(type)
+    }
+</script>
