@@ -1,3 +1,10 @@
+<head>
+    <title>Dashboard - Crosshatch</title>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+    <script src="//code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+</head>
+
 <h1>Welcome to the dashboard.</h1>
 
 <button onclick="start()">Start All Containers</button>
@@ -5,18 +12,46 @@
 <button onclick="stop()">Stop All Containers</button>
 
 <button onclick="kill()">Kill All Containers</button>
+<br></br>
 
-<div id="containers">
-    <% for (var i = 0; i < containers_list.length; i++) { %>
-        <div id="container_<%= containers_list[i].Id %>">
-            <h2><a id="name_<%= containers_list[i].Id %>" href="/dashboard/container/<%= containers_list[i].Id %>">Name: <%= containers_list[i].Names[0] %></a></h2>
-            <a id="image_<%= containers_list[i].Id %>">Image: <%= containers_list[i].Image %></a><br>
-            <a id="state_<%= containers_list[i].Id %>">State: <%= containers_list[i].State %></a><br>
-            <a id="status_<%= containers_list[i].Id %>">Uptime: <%= containers_list[i].Status %></a><br>
-            <a id="id_<%= containers_list[i].Id %>">Container ID: <%= containers_list[i].Id %></a><br>
-        </div>
-    <% } %>
-</div>
+<table id="containers" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Image</th>
+            <th>State</th>
+            <th>Uptime</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for (var i=0; i < containers_list.length; i++) { %>
+            <tr id="container_<%= containers_list[i].Id %>">
+                <td><a id="name_<%= containers_list[i].Id %>" href="/dashboard/container/<%= containers_list[i].Id %>">
+                        <%= containers_list[i].Names[0] %>
+                    </a></td>
+                <td id="image_<%= containers_list[i].Id %>">
+                    <%= containers_list[i].Image %>
+                </td>
+                <td id="state_<%= containers_list[i].Id %>">
+                    <%= containers_list[i].State %>
+                </td>
+                <td id="status_<%= containers_list[i].Id %>">
+                    <%= containers_list[i].Status %>
+                </td>
+                <td id="id_<%= containers_list[i].Id %>">
+                    <%= containers_list[i].Id %>
+                </td>
+            </tr>
+            <% } %>
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        $('#containers').DataTable();
+    });
+</script>
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -37,23 +72,23 @@
                     <a id="id_${json[i].Id}">Container ID: ${json[i].Id}</a><br>
                 </div>`;
             } else {
-                document.getElementById(`name_${json[i].Id}`).innerHTML = `Name: ${json[i].Names[0]}`
-                document.getElementById(`image_${json[i].Id}`).innerHTML = `Image: ${json[i].Image}`
-                document.getElementById(`state_${json[i].Id}`).innerHTML = `State: ${json[i].State}`
-                document.getElementById(`status_${json[i].Id}`).innerHTML = `Uptime: ${json[i].Status}`
-                document.getElementById(`id_${json[i].Id}`).innerHTML = `Container ID: ${json[i].Id}`
+                document.getElementById(`name_${json[i].Id}`).innerHTML = `${json[i].Names[0]}`
+                document.getElementById(`image_${json[i].Id}`).innerHTML = `${json[i].Image}`
+                document.getElementById(`state_${json[i].Id}`).innerHTML = `${json[i].State}`
+                document.getElementById(`status_${json[i].Id}`).innerHTML = `${json[i].Status}`
+                document.getElementById(`id_${json[i].Id}`).innerHTML = `${json[i].Id}`
             }
         }
     }
 
-    setInterval(function() {
+    setInterval(function () {
         socket.send("data")
     }, 1000);
 </script>
 
 <script>
     async function start() {
-        const res = await fetch("/dashboard/container/all/actions/start", { method: "POST", credentials: "same-origin"});
+        const res = await fetch("/dashboard/container/all/actions/start", { method: "POST", credentials: "same-origin" });
         const response = await res.json();
         if (response.status === 'STARTED') {
             Swal.fire({
@@ -73,7 +108,7 @@
 
 <script>
     async function stop() {
-        const res = await fetch("/dashboard/container/all/actions/stop", { method: "POST", credentials: "same-origin"});
+        const res = await fetch("/dashboard/container/all/actions/stop", { method: "POST", credentials: "same-origin" });
         const response = await res.json();
         if (response.status === 'STOPPED') {
             Swal.fire({
@@ -93,7 +128,7 @@
 
 <script>
     async function kill() {
-        const res = await fetch("/dashboard/container/all/actions/kill", { method: "POST", credentials: "same-origin"});
+        const res = await fetch("/dashboard/container/all/actions/kill", { method: "POST", credentials: "same-origin" });
         const response = await res.json();
         if (response.status === 'KILLED') {
             Swal.fire({
@@ -113,6 +148,6 @@
 
 <style>
     body {
-        font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+        font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 </style>
