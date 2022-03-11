@@ -16,3 +16,19 @@ EJS send a console error when visiting an unknown container ID, even though it s
 - Make the css nicer
 - Add more features
 - Make console log to a file each startup so it can be served to the frontend when needed
+
+## Ubuntu Installation:
+(RUN AS ROOT)
+
+Install dependencies:
+```sh 
+curl -sSL https://get.docker.com/ | CHANNEL=stable bash
+sudo apt-get install make cmake software-properties-common
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt install python3.8
+```
+
+Install modules:
+```sh
+yarn
+```
