@@ -23,7 +23,7 @@ EJS send a console error when visiting an unknown container ID, even though it s
 Install dependencies:
 ```sh 
 curl -sSL https://get.docker.com/ | CHANNEL=stable bash
-sudo apt-get install make cmake software-properties-common
+sudo apt-get install -y make cmake software-properties-common build-essential
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install python3.8
 ```
